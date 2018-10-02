@@ -14,16 +14,18 @@ import kotlin.math.absoluteValue
 class MultipleShapes @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
-    private val shapes = mutableListOf<Shape>()
+    //    private val shapes = mutableListOf<Shape>()
+    private val shapeManager = ShapeManager()
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        for (shape in shapes) {
-            shape.draw(canvas)
+        shapeManager.forEach {
+            it.draw(canvas)
         }
     }
 
     fun addShape(shape: Shape) {
-        shapes.add(0, shape)
+        shapeManager.add(shape)
         invalidate()
     }
 
@@ -33,7 +35,7 @@ class MultipleShapes @JvmOverloads constructor(
     private var selectedValue: Shape? = null
 
     fun getShape(id: Long): Shape? {
-        return shapes.firstOrNull { it.id == id }
+        return shapeManager.get(id)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -51,8 +53,8 @@ class MultipleShapes @JvmOverloads constructor(
                 val deltaY = event.rawY - downY
                 Log.d(TAG, "DELTA: [$deltaX : $deltaY]")
 
-                if (deltaX.absoluteValue < delta && deltaY.absoluteValue < delta && shapes.isNotEmpty()) {
-                    shapes.firstOrNull() { it.include(event.x, event.y) }
+                if (deltaX.absoluteValue < delta && deltaY.absoluteValue < delta && shapeManager.isNotEmpty()) {
+                    shapeManager.firstOrNull { it.include(event.x, event.y) }
                             .apply {
                                 selectedValue?.selected = false
                                 selectedValue = this
@@ -60,13 +62,10 @@ class MultipleShapes @JvmOverloads constructor(
                                 invalidate()
                             }
                     return true
-//                    performClick()
                 }
                 selectedValue?.selected = false
             }
         }
-//            val path = Path()
-//        path.
         return super.onTouchEvent(event)
     }
 
