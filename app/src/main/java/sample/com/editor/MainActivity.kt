@@ -28,7 +28,10 @@ class MainActivity : AppCompatActivity() {
         layoutParams.leftMargin = random.nextInt(100)
         layoutParams.topMargin = random.nextInt(100)
         mainLayout.addView(multipleShapes)
-        multipleShapes.addShape(Circle(PointF(100f, 100f), 100f))
+        val circle = Circle(PointF(200f, 200f), 100f).apply {
+            selected = true
+        }
+        multipleShapes.addShape(circle)
 //
 //        var endTime = System.nanoTime() - startTime
 //        Log.d(TAG, "drawFinished: 1 multiple shapes${TimeUnit.NANOSECONDS.toMicros(endTime)} ")
@@ -63,7 +66,8 @@ class MainActivity : AppCompatActivity() {
     fun onClickButton(view: View) {
         val x = random.nextInt(400).toFloat()
         val y = random.nextInt(400).toFloat()
-        multipleShapes.addShape(Circle(PointF(x, y), 100f))
+        val radius = random.nextInt(400).toFloat()
+        multipleShapes.addShape(Circle(PointF(x, y), radius))
     }
 
     companion object {

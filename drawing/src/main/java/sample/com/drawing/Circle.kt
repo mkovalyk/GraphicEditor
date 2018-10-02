@@ -4,19 +4,13 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
-import kotlin.math.min
+import android.util.Log
 
 /**
  * Created on 01.10.18.
  */
-open class Circle(center: PointF, radius: Float) : Shape() {
+open class Circle(val center: PointF, val radius: Float) : Shape() {
 
-    init {
-        x = center.x - radius
-        y = center.y - radius
-        width = radius * 2
-        height = radius * 2
-    }
 
     private val paint = Paint().apply {
         color = Color.RED
@@ -24,8 +18,16 @@ open class Circle(center: PointF, radius: Float) : Shape() {
         strokeWidth = 10f
     }
 
+    init {
+        x = center.x - radius - paint.strokeWidth / 2
+        y = center.y - radius - paint.strokeWidth / 2
+        width = radius * 2 + paint.strokeWidth
+        height = radius * 2 + paint.strokeWidth
+        Log.d("Circle", "Center: $center. Radius: $radius")
+    }
+
     override fun draw(canvas: Canvas) {
-        canvas.drawCircle(x + width / 2, y + height / 2, min(width / 2, height / 2), paint)
+        canvas.drawCircle(center.x, center.y, radius, paint)
         super.draw(canvas)
     }
 }
