@@ -1,16 +1,13 @@
 package sample.com.drawing
 
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.DashPathEffect
-import android.graphics.Paint
+import android.graphics.*
 import android.util.Log
 
 
 /**
  * Created on 01.10.18.
  */
-abstract class Shape {
+abstract class Shape(val id: Long) {
     var x = 0f
         protected set
     var y = 0f
@@ -20,6 +17,7 @@ abstract class Shape {
         protected set
     var height = 0f
         protected set
+    protected val path = Path()
 
     val selectedPaint = Paint().apply {
         color = Color.BLUE

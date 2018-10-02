@@ -1,15 +1,12 @@
 package sample.com.drawing
 
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.PointF
+import android.graphics.*
 import android.util.Log
 
 /**
  * Created on 01.10.18.
  */
-open class Circle(val center: PointF, val radius: Float) : Shape() {
+open class Circle(val center: PointF, val radius: Float, id: Long) : Shape(id) {
 
 
     private val paint = Paint().apply {
@@ -23,11 +20,13 @@ open class Circle(val center: PointF, val radius: Float) : Shape() {
         y = center.y - radius - paint.strokeWidth / 2
         width = radius * 2 + paint.strokeWidth
         height = radius * 2 + paint.strokeWidth
+        path.reset()
+        path.addCircle(center.x, center.y, radius, Path.Direction.CW)
         Log.d("Circle", "Center: $center. Radius: $radius")
     }
 
     override fun draw(canvas: Canvas) {
-        canvas.drawCircle(center.x, center.y, radius, paint)
+        canvas.drawPath(path, paint)
         super.draw(canvas)
     }
 }

@@ -14,27 +14,12 @@ import kotlin.math.absoluteValue
 class MultipleShapes @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
-//    val paint = Paint().apply {
-//        color = Color.RED
-//        strokeWidth = 10f
-//        style = Paint.Style.STROKE
-//    }
-//    val random = Random()
-
     private val shapes = mutableListOf<Shape>()
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         for (shape in shapes) {
             shape.draw(canvas)
         }
-//        val startTime = System.nanoTime()
-//        for (counter in 0..50) {
-//            canvas.drawCircle(random.nextInt(1000).toFloat(),
-//                    random.nextInt(1000).toFloat(),
-//                    random.nextInt(100).toFloat(),
-//                    paint)
-//        }
-//        Log.d(TAG, "drawFinished: ${(System.nanoTime() - startTime).div(1000)} ")
     }
 
     fun addShape(shape: Shape) {
@@ -47,10 +32,14 @@ class MultipleShapes @JvmOverloads constructor(
     private val delta = 50
     private var selectedValue: Shape? = null
 
+    fun getShape(id: Long): Shape? {
+        return shapes.firstOrNull { it.id == id }
+    }
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-        Log.d(TAG, "event: $event ")
+                Log.d(TAG, "event: $event ")
                 downX = event.rawX
                 downY = event.rawY
                 Log.d(TAG, "DOWN: [$downX : $downY]")
@@ -76,6 +65,8 @@ class MultipleShapes @JvmOverloads constructor(
                 selectedValue?.selected = false
             }
         }
+//            val path = Path()
+//        path.
         return super.onTouchEvent(event)
     }
 

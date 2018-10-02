@@ -1,5 +1,6 @@
 package sample.com.editor
 
+import android.animation.ObjectAnimator
 import android.graphics.PointF
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -14,6 +15,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var multipleShapes: MultipleShapes
     private val random = Random()
     val mainLayout by lazy { findViewById<FrameLayout>(R.id.main_layout) }
+    private lateinit var circle: Circle
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         layoutParams.leftMargin = random.nextInt(100)
         layoutParams.topMargin = random.nextInt(100)
         mainLayout.addView(multipleShapes)
-        val circle = Circle(PointF(200f, 200f), 100f).apply {
+        circle = Circle(PointF(200f, 200f), 100f, System.currentTimeMillis()).apply {
             selected = true
         }
         multipleShapes.addShape(circle)
@@ -62,12 +64,24 @@ class MainActivity : AppCompatActivity() {
 //        },1000)
     }
 
-
     fun onClickButton(view: View) {
-        val x = random.nextInt(400).toFloat()
-        val y = random.nextInt(400).toFloat()
-        val radius = random.nextInt(400).toFloat()
-        multipleShapes.addShape(Circle(PointF(x, y), radius))
+        when (view.id) {
+            R.id.button -> {
+                val x = random.nextInt(400).toFloat()
+                val y = random.nextInt(400).toFloat()
+                val radius = random.nextInt(400).toFloat()
+                circle = Circle(PointF(x, y), radius, System.currentTimeMillis())
+                multipleShapes.addShape(circle)
+            }
+            R.id.animate -> {
+                val animator = ObjectAnimator.ofFloat(circle, "x", 300f)
+                animator.duration = 200
+                animator.start()
+                animator.addUpdateListener {
+                    multipleShapes.invalidate()
+                }
+            }
+        }
     }
 
     companion object {

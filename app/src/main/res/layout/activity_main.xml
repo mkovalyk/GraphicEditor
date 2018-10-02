@@ -13,6 +13,13 @@
         android:layout_gravity="bottom|center_horizontal"
         android:text="Add"
         android:onClick="onClickButton"/>
+    <Button
+        android:id="@+id/animate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:text="Animate"
+        android:onClick="onClickButton"/>
 
     <FrameLayout
         android:id="@+id/layout"
@@ -21,8 +28,4 @@
 
     </FrameLayout>
 
-    <!--<sample.com.drawing.MultipleShapes-->
-    <!--android:id="@+id/multiple_shapes"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent"/>-->
 </FrameLayout>
