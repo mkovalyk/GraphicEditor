@@ -15,7 +15,7 @@ class MultipleShapes @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
     //    private val shapes = mutableListOf<Shape>()
-    private val shapeManager = ShapeManager()
+    val shapeManager = ShapeManager()
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)

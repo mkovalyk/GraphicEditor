@@ -8,6 +8,8 @@ import android.view.View
 import android.widget.FrameLayout
 import sample.com.drawing.Circle
 import sample.com.drawing.MultipleShapes
+import sample.com.drawing.operation.AddShapeOperation
+import sample.com.drawing.operation.OperationManager
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -30,10 +32,14 @@ class MainActivity : AppCompatActivity() {
         layoutParams.leftMargin = random.nextInt(100)
         layoutParams.topMargin = random.nextInt(100)
         mainLayout.addView(multipleShapes)
+
         circle = Circle(PointF(200f, 200f), 100f, System.currentTimeMillis()).apply {
             selected = true
         }
-        multipleShapes.addShape(circle)
+        manager.apply(AddShapeOperation(multipleShapes.shapeManager, circle))
+        multipleShapes.invalidate()
+
+//        multipleShapes.addShape(circle)
 //
 //        var endTime = System.nanoTime() - startTime
 //        Log.d(TAG, "drawFinished: 1 multiple shapes${TimeUnit.NANOSECONDS.toMicros(endTime)} ")
@@ -64,6 +70,8 @@ class MainActivity : AppCompatActivity() {
 //        },1000)
     }
 
+    val manager = OperationManager()
+
     fun onClickButton(view: View) {
         when (view.id) {
             R.id.button -> {
@@ -71,13 +79,24 @@ class MainActivity : AppCompatActivity() {
                 val y = random.nextInt(400).toFloat()
                 val radius = random.nextInt(400).toFloat()
                 circle = Circle(PointF(x, y), radius, System.currentTimeMillis())
-                multipleShapes.addShape(circle)
+                manager.apply(AddShapeOperation(multipleShapes.shapeManager, circle))
+                multipleShapes.invalidate()
             }
             R.id.animate -> {
                 val animator = ObjectAnimator.ofFloat(circle, "x", 300f)
                 animator.duration = 200
                 animator.start()
                 animator.addUpdateListener {
+                    multipleShapes.invalidate()
+                }
+            }
+            R.id.undo -> {
+                manager.undo {
+                    multipleShapes.invalidate()
+                }
+            }
+            R.id.redo -> {
+                manager.redo {
                     multipleShapes.invalidate()
                 }
             }

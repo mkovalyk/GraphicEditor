@@ -12,19 +12,23 @@ class OperationManager {
         executedOperations.add(operation)
     }
 
-    fun undo() {
+    fun undo(operation: (Operation) -> Unit) {
         val latestOperation = executedOperations.lastOrNull()
         if (latestOperation != null) {
             latestOperation.revert()
             undoneOperations.add(latestOperation)
+            executedOperations.remove(latestOperation)
+            operation.invoke(latestOperation)
         }
     }
 
-    fun redo() {
+    fun redo(operation: (Operation) -> Unit) {
         val latestOperation = undoneOperations.lastOrNull()
         if (latestOperation != null) {
             latestOperation.execute()
             executedOperations.add(latestOperation)
+            undoneOperations.remove(latestOperation)
+            operation.invoke(latestOperation)
         }
     }
 }
