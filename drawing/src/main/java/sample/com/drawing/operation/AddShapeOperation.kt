@@ -1,6 +1,6 @@
 package sample.com.drawing.operation
 
-import sample.com.drawing.Shape
+import sample.com.drawing.shape.Shape
 import sample.com.drawing.ShapeManager
 
 /**

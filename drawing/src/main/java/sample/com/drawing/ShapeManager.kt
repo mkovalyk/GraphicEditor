@@ -1,5 +1,7 @@
 package sample.com.drawing
 
+import sample.com.drawing.shape.Shape
+
 /**
  * Created on 02.10.18.
  */

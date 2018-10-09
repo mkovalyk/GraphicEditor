@@ -7,7 +7,7 @@ class OperationManager {
     private val executedOperations = mutableListOf<Operation>()
     private val undoneOperations = mutableListOf<Operation>()
 
-    fun apply(operation: Operation) {
+    fun perform(operation: Operation) {
         operation.execute()
         executedOperations.add(operation)
     }

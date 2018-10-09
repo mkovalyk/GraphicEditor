@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import sample.com.drawing.shape.Shape
 import kotlin.math.absoluteValue
 
 /**
@@ -32,38 +33,40 @@ class MultipleShapes @JvmOverloads constructor(
     private var downX: Float = 0f
     private var downY: Float = 0f
     private val delta = 50
-    private var selectedValue: Shape? = null
+    var selectedValue: Shape? = null
 
     fun getShape(id: Long): Shape? {
         return shapeManager.get(id)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                Log.d(TAG, "event: $event ")
-                downX = event.rawX
-                downY = event.rawY
-                Log.d(TAG, "DOWN: [$downX : $downY]")
-                return true
-            }
-            MotionEvent.ACTION_UP -> {
-                Log.d(TAG, "event: $event ")
-                val deltaX = event.rawX - downX
-                val deltaY = event.rawY - downY
-                Log.d(TAG, "DELTA: [$deltaX : $deltaY]")
-
-                if (deltaX.absoluteValue < delta && deltaY.absoluteValue < delta && shapeManager.isNotEmpty()) {
-                    shapeManager.firstOrNull { it.include(event.x, event.y) }
-                            .apply {
-                                selectedValue?.selected = false
-                                selectedValue = this
-                                this?.selected = true
-                                invalidate()
-                            }
+        val value = selectedValue
+        if (value != null && value.handleTouch(event)) {
+            Log.d(TAG, "Event has been consumed")
+            return true
+        } else {
+            Log.d(TAG, "Event has not been consumed. Proceed to default")
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    downX = event.rawX
+                    downY = event.rawY
                     return true
                 }
-                selectedValue?.selected = false
+                MotionEvent.ACTION_UP -> {
+                    val deltaX = event.rawX - downX
+                    val deltaY = event.rawY - downY
+
+                    if (deltaX.absoluteValue < delta && deltaY.absoluteValue < delta && shapeManager.isNotEmpty()) {
+                        shapeManager.firstOrNull { it.containsUsingMatrix(event.x, event.y) }
+                                .apply {
+                                    selectedValue?.select(false)
+                                    selectedValue = this
+                                    this?.select(true)
+                                    return true
+                                }
+                    }
+                    selectedValue?.select(false)
+                }
             }
         }
         return super.onTouchEvent(event)
