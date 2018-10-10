@@ -7,6 +7,7 @@ import android.view.View
 import sample.com.drawing.Boundary
 import sample.com.drawing.State
 import sample.com.drawing.toArray
+import kotlin.math.min
 
 
 /**
@@ -42,7 +43,9 @@ abstract class Shape(val id: Long, var container: View? = null) {
         onBordersChanged(borders)
         val width = borders.width()
         val height = borders.height()
-        resizeIndicator.set(left + width * 0.6f, top + height * 0.6f, left + width * 1.0f, top + height * 1.0f)
+        val offset = min(width * 0.4f, height * 0.4f)
+        val minOffset = min(offset, 100f)
+        resizeIndicator.set(right - minOffset, bottom - minOffset, right, bottom)
     }
 
     protected open fun onBordersChanged(borders: RectF) {
@@ -193,8 +196,6 @@ abstract class Shape(val id: Long, var container: View? = null) {
     private fun containsUsingMatrix(rect: RectF, x: Float, y: Float): Boolean {
         Log.d(TAG, "containsMatrix:[$x, $y ]. Rectangle: $rect")
         val mappedValue = floatArrayOf(x, y)
-        latestClickedPoint.x = mappedValue[0]
-        latestClickedPoint.y = mappedValue[1]
         val values = rect.toArray()
         val result = FloatArray(values.size)
 
@@ -203,6 +204,11 @@ abstract class Shape(val id: Long, var container: View? = null) {
         val contains = boundary.contains(PointF(mappedValue[0], mappedValue[1]))
 
         Log.d(TAG, "containsMatrix: [${mappedValue[0]}, ${mappedValue[1]}]. Boundary: $boundary Result: $contains")
+//        matrix.mapPoints(mappedValue)
+        latestClickedPoint.x = mappedValue[0]
+        latestClickedPoint.y = mappedValue[1]
+
+//        Log.d(TAG, "Mapped values: $x -> ${mappedValue[0]}, $y -> ${mappedValue[1]}. ")
         return contains
     }
 
