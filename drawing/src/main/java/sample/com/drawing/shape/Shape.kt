@@ -4,7 +4,9 @@ import android.graphics.*
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import sample.com.drawing.Boundary
 import sample.com.drawing.State
+import sample.com.drawing.toArray
 
 
 /**
@@ -17,15 +19,20 @@ abstract class Shape(val id: Long, var container: View? = null) {
         protected set(value) {
             field = value
             Log.d(TAG, "state Changed: $value")
+            invalidate()
         }
     var matrix: Matrix = Matrix()
     protected var rotation = 0f
     protected val path = Path()
-    //    protected var container: View? = null
     protected val resizeIndicator = RectF()
 
     val resizePaint = Paint().apply {
         color = Color.RED
+        strokeWidth = 2f
+        style = Paint.Style.FILL
+    }
+    val resizeTouchedPaint = Paint().apply {
+        color = Color.BLUE
         strokeWidth = 2f
         style = Paint.Style.FILL
     }
@@ -55,6 +62,12 @@ abstract class Shape(val id: Long, var container: View? = null) {
         pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f)
         style = Paint.Style.STROKE
     }
+    val mappedPaint = Paint().apply {
+        color = Color.RED
+        strokeWidth = 2f
+        pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 1f)
+        style = Paint.Style.STROKE
+    }
 
 
     fun rotate(angle: Float) {
@@ -64,6 +77,7 @@ abstract class Shape(val id: Long, var container: View? = null) {
     }
 
     fun rotateBy(angle: Float) {
+        Log.d(TAG, "rotateBy:$angle")
         rotation += angle
         matrix.setRotate(rotation, borders.centerX(), borders.centerY())
         invalidate()
@@ -77,9 +91,16 @@ abstract class Shape(val id: Long, var container: View? = null) {
         invalidate()
     }
 
+    var translationX: Float = 0f
+    var translationY: Float = 0f
+
     fun move(deltaX: Float, deltaY: Float) {
         with(borders) {
-            setBorders(left + deltaX, top + deltaY, right + deltaX, bottom + deltaY)
+            translationX += deltaX
+            translationY += deltaY
+            Log.d(TAG, "move:$translationX, $translationY")
+            matrix.postTranslate(deltaX, deltaY)
+//            setBorders(left + deltaX, top + deltaY, right + deltaX, bottom + deltaY)
         }
         invalidate()
     }
@@ -89,17 +110,18 @@ abstract class Shape(val id: Long, var container: View? = null) {
         return borders.contains(x, y)
     }
 
-    var downX: Float = 0f
-    var downY: Float = 0f
+    private var downX: Float = 0f
+    private var downY: Float = 0f
 
     open fun handleTouch(event: MotionEvent): Boolean {
         if (state == State.Selected) {
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     if (containsUsingMatrix(resizeIndicator, event.x, event.y)) {
-                        Log.d(TAG, "Start dragging: ")
-                        downX = event.rawX
-                        downY = event.rawY
+                        val points = floatArrayOf(event.x, event.y)
+                        matrix.mapPoints(points)
+                        downX = points[0]
+                        downY = points[1]
                         state = State.Resizing
                         return true
                     } else if (containsUsingMatrix(borders, event.x, event.y)) {
@@ -124,11 +146,15 @@ abstract class Shape(val id: Long, var container: View? = null) {
     private fun handleResizing(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_MOVE -> {
-                Log.d(TAG, "handleResizing. State: $state Event: $event")
-                val deltaX = event.rawX - downX
-                val deltaY = event.rawY - downY
-                downX = event.rawX
-                downY = event.rawY
+//                Log.d(TAG, "handleResizing. State: $state Event: $event")
+                val points = floatArrayOf(event.x, event.y)
+                matrix.mapPoints(points)
+                val deltaX = points[0] - downX
+                val deltaY = points[1] - downY
+
+                downX = points[0]
+                downY = points[1]
+//                resize(deltaX * cos(rotation), deltaY * cos(rotation.toRadians()))
                 resize(deltaX, deltaY)
                 return true
             }
@@ -143,7 +169,7 @@ abstract class Shape(val id: Long, var container: View? = null) {
     private fun handleDragging(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_MOVE -> {
-                Log.d(TAG, "handleDragging. State: $state Event: $event")
+//                Log.d(TAG, "handleDragging. State: $state Event: $event")
                 val deltaX = event.rawX - downX
                 val deltaY = event.rawY - downY
                 downX = event.rawX
@@ -160,40 +186,50 @@ abstract class Shape(val id: Long, var container: View? = null) {
     }
 
     fun containsUsingMatrix(x: Float, y: Float): Boolean {
-        val mappedValue = floatArrayOf(x, y)
-        matrix.mapPoints(mappedValue)
-        val finalRectangle = RectF()
-        matrix.mapRect(finalRectangle, borders)
-        val contains = finalRectangle.contains(mappedValue[0], mappedValue[1])
-        Log.d(TAG, "containsMatrix: [${mappedValue[0]}, ${mappedValue[1]}]. This:$finalRectangle. Result: $contains")
-        return contains
+        return containsUsingMatrix(borders, x, y)
     }
 
+    private var latestClickedPoint = PointF()
     private fun containsUsingMatrix(rect: RectF, x: Float, y: Float): Boolean {
+        Log.d(TAG, "containsMatrix:[$x, $y ]. Rectangle: $rect")
         val mappedValue = floatArrayOf(x, y)
-        matrix.mapPoints(mappedValue)
-        val finalRectangle = RectF()
-        matrix.mapRect(finalRectangle, rect)
-        val contains = finalRectangle.contains(mappedValue[0], mappedValue[1])
-        Log.d(TAG, "containsMatrix: [${mappedValue[0]}, ${mappedValue[1]}]. This:$finalRectangle. Result: $contains")
+        latestClickedPoint.x = mappedValue[0]
+        latestClickedPoint.y = mappedValue[1]
+        val values = rect.toArray()
+        val result = FloatArray(values.size)
+
+        matrix.mapPoints(result, values)
+        val boundary = Boundary.fromArray(result)
+        val contains = boundary.contains(PointF(mappedValue[0], mappedValue[1]))
+
+        Log.d(TAG, "containsMatrix: [${mappedValue[0]}, ${mappedValue[1]}]. Boundary: $boundary Result: $contains")
         return contains
     }
 
     fun draw(canvas: Canvas) {
         val count = canvas.save()
         canvas.matrix = matrix
-        if (state == State.Selected || state == State.Dragging || state == State.Resizing) {
+        if (state == State.Selected || state == State.Dragging) {
             canvas.drawRect(borders, selectedPaint)
             canvas.drawRect(resizeIndicator, resizePaint)
+        } else if (state == State.Resizing) {
+            canvas.drawRect(borders, selectedPaint)
+            canvas.drawRect(resizeIndicator, resizeTouchedPaint)
         }
         onDraw(canvas)
         canvas.restoreToCount(count)
+
+        val finalRectangle = RectF()
+        matrix.mapRect(finalRectangle, borders)
+        canvas.drawRect(finalRectangle, mappedPaint)
+
+        canvas.drawCircle(latestClickedPoint.x, latestClickedPoint.y, 10f, resizePaint)
+
     }
 
     protected abstract fun onDraw(canvas: Canvas)
 
     fun invalidate() {
-        Log.d(TAG, "invalidate")
         container?.invalidate()
     }
 

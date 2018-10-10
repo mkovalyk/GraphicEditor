@@ -3,7 +3,6 @@ package sample.com.drawing
 import android.content.Context
 import android.graphics.Canvas
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import sample.com.drawing.shape.Shape
@@ -42,10 +41,9 @@ class MultipleShapes @JvmOverloads constructor(
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val value = selectedValue
         if (value != null && value.handleTouch(event)) {
-            Log.d(TAG, "Event has been consumed")
+//            Log.d(TAG, "Event has been consumed")
             return true
         } else {
-            Log.d(TAG, "Event has not been consumed. Proceed to default")
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     downX = event.rawX
