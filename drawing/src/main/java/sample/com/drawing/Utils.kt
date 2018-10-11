@@ -13,3 +13,7 @@ fun RectF.toArray(): FloatArray {
 fun Float.toRadians(): Float {
     return this / 180.0f * PI.toFloat()
 }
+
+fun Float.toDegree(): Float {
+    return this * 180f / PI.toFloat()
+}
