@@ -4,13 +4,8 @@ import android.graphics.*
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import sample.com.drawing.Boundary
-import sample.com.drawing.State
-import sample.com.drawing.toArray
-import sample.com.drawing.toDegree
-import kotlin.math.abs
-import kotlin.math.atan2
-import kotlin.math.min
+import sample.com.drawing.*
+import kotlin.math.*
 
 
 /**
@@ -164,14 +159,6 @@ abstract class Shape(val id: Long, var container: View? = null) {
         originAngle = atan2(event.y - centerPoint[1], event.x - centerPoint[0]).toDegree()
     }
 
-    private fun enterResizingMode(event: MotionEvent) {
-        val startPoint = floatArrayOf(event.x, event.y)
-        matrix.mapPoints(startPoint)
-        downX = startPoint[0]
-        downY = startPoint[1]
-        state = State.Resizing
-    }
-
     private fun handleRotating(event: MotionEvent): Boolean {
         when (event.action) {
 
@@ -195,20 +182,50 @@ abstract class Shape(val id: Long, var container: View? = null) {
         return false
     }
 
+
+    private var totalDeltaX = 0f
+    private var totalDeltaY = 0f
+
+    private fun enterResizingMode(event: MotionEvent) {
+        val startPoint = floatArrayOf(event.x, event.y)
+//        matrix.mapPoints(startPoint)
+        downX = startPoint[0]
+        downY = startPoint[1]
+        totalDeltaX = downX
+        totalDeltaY = downY
+        state = State.Resizing
+        Log.d(TAG, " --------------------------------------------------------------------------------------------------- ")
+    }
+
     private fun handleResizing(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_MOVE -> {
                 val points = floatArrayOf(event.x, event.y)
-                matrix.mapPoints(points)
+//                matrix.mapPoints(points)
                 val deltaX = points[0] - downX
                 val deltaY = points[1] - downY
-
                 downX = points[0]
                 downY = points[1]
-                resize(deltaX, deltaY)
+                val rotationRad = rotation.toRadians()
+                val deltaHorizontal = deltaX * cos(rotationRad) + deltaY * sin(rotationRad)
+                val deltaVertical = deltaY * cos(rotationRad) - deltaX * sin(rotationRad)
+
+//                setBorders(borders.left, borders.top, points[0], points[1])
+//                invalidate()
+                resize(deltaHorizontal, deltaVertical)
+
+                Log.d(TAG, " resize. rotation:$rotation Deltas:[$deltaX, $deltaY]. Converted: [$deltaHorizontal, $deltaVertical].")
                 return true
             }
             MotionEvent.ACTION_UP -> {
+                val deltaX = event.x - totalDeltaX
+                val deltaY = event.y - totalDeltaY
+                val rotationRad = rotation.toRadians()
+                val deltaHorizontal = deltaX * cos(rotationRad) + deltaY * sin(rotationRad)
+                val deltaVertical = deltaY * cos(rotationRad) + deltaX * sin(rotationRad)
+
+                Log.d(TAG, " --------------------------------------------------------------------------------------------------- ")
+                Log.d(TAG, " resize. - UP rotation:$rotation Deltas:[$deltaX, $deltaY]. Converted: [$deltaHorizontal, $deltaVertical].")
                 state = State.Selected
                 return true
             }
@@ -219,7 +236,6 @@ abstract class Shape(val id: Long, var container: View? = null) {
     private fun handleDragging(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_MOVE -> {
-//                Log.d(TAG, "handleDragging. State: $state Event: $event")
                 val deltaX = event.rawX - downX
                 val deltaY = event.rawY - downY
                 downX = event.rawX
@@ -239,25 +255,15 @@ abstract class Shape(val id: Long, var container: View? = null) {
         return containsUsingMatrix(borders, x, y)
     }
 
-    private var latestClickedPoint = PointF()
-
     private fun containsUsingMatrix(rect: RectF, x: Float, y: Float): Boolean {
-        Log.d(TAG, "containsMatrix:[$x, $y ]. Rectangle: $rect")
         val mappedValue = floatArrayOf(x, y)
         val values = rect.toArray()
         val result = FloatArray(values.size)
 
         matrix.mapPoints(result, values)
         val boundary = Boundary.fromArray(result)
-        val contains = boundary.contains(PointF(mappedValue[0], mappedValue[1]))
 
-        Log.d(TAG, "containsMatrix: [${mappedValue[0]}, ${mappedValue[1]}]. Boundary: $boundary Result: $contains")
-//        matrix.mapPoints(mappedValue)
-        latestClickedPoint.x = mappedValue[0]
-        latestClickedPoint.y = mappedValue[1]
-
-//        Log.d(TAG, "Mapped values: $x -> ${mappedValue[0]}, $y -> ${mappedValue[1]}. ")
-        return contains
+        return boundary.contains(PointF(mappedValue[0], mappedValue[1]))
     }
 
     fun draw(canvas: Canvas) {
@@ -271,19 +277,8 @@ abstract class Shape(val id: Long, var container: View? = null) {
             canvas.drawRect(borders, selectedPaint)
             canvas.drawRect(resizeIndicator, resizeTouchedPaint)
         }
-// else if (state == State.Rotating) {
-//            canvas.drawRect(borders, selectedPaint)
-//            canvas.drawRect(resizeIndicator, rotatePaint)
-//        }
         onDraw(canvas)
         canvas.restoreToCount(count)
-
-//        val finalRectangle = RectF()
-//        matrix.mapRect(finalRectangle, borders)
-//        canvas.drawRect(finalRectangle, mappedPaint)
-
-//        canvas.drawCircle(latestClickedPoint.x, latestClickedPoint.y, 10f, resizePaint)
-
     }
 
     protected abstract fun onDraw(canvas: Canvas)
