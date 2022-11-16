@@ -1,21 +1,11 @@
 {
-    "schemeVersion": 1,
-    "editionVersion": 1,
-    "translations": {
-        "LoginScreen": {
-            "ButtonName": {
-                "value": "Увійти {param1} ({param2})",
-                "params": {
-                    "param1": {
-                        "type": "format",
-                        "format": "startTime"
-                    },
-                    "param2": {
-                        "type": "format",
-                        "format": "startTime"
-                    }
-                }
-            }
-        }
-    }
+    "buckets": [{
+        "name": "login",
+        "schemeVersion": 1,
+        "editionVersion": 1,
+        "defaultLanguage":"en",
+        "languages": [
+            "en", "ua"
+        ]
+    }]
 }
