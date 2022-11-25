@@ -1,11 +1,14 @@
 {
-    "buckets": [{
-        "name": "login",
-        "schemeVersion": 1,
-        "editionVersion": 1,
-        "defaultLanguage":"en",
-        "languages": [
-            "en", "ua"
-        ]
-    }]
+    "defaultLanguage": "en",
+    "languages": [
+        "en",
+        "ua"
+    ],
+    "buckets": [
+        {
+            "name": "login",
+            "schemeVersion": 1,
+            "editionVersion": 1
+        }
+    ]
 }
