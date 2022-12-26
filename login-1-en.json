@@ -6,13 +6,11 @@
             "key": "LoginScreen.ButtonName",
             "params": [
                 {
-                    "format": "startTime",
-                    "type": "format",
+                    "type": "string",
                     "key": "param1"
                 },
                 {
-                    "format": "startTime",
-                    "type": "format",
+                    "type": "long",
                     "key": "param2"
                 }
             ],
