@@ -11,7 +11,8 @@
                 },
                 {
                     "type": "long",
-                    "key": "param2"
+                    "key": "param2",
+                    "format":"startDate"
                 }
             ],
             "value": "Log in {param1} ({param2})"
