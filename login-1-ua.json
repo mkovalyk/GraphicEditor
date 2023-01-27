@@ -5,13 +5,14 @@
         {
             "key": "LoginScreen.ButtonName",
             "params": [
-                 {
+                {
                     "type": "string",
                     "key": "param1"
                 },
                 {
                     "type": "long",
-                    "key": "param2"
+                    "key": "param2",
+                    "format":"startDate"
                 }
             ],
             "value": "Увійти {param1} ({param2})"
